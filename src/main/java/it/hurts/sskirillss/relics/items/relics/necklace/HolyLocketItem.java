@@ -298,7 +298,7 @@ public class HolyLocketItem extends RelicItem implements IRenderableCurio {
                     return;
 
                 for (LivingEntity target : level.getEntitiesOfClass(LivingEntity.class, player.getBoundingBox().inflate(relic.getStatValue(stack, "belief", "radius"))).stream()
-                        .filter(player::hasLineOfSight).sorted(Comparator.comparing(entity -> entity.position().distanceTo(player.position()))).limit((int) relic.getStatValue(stack, "belief", "count")).toList()) {
+                        .filter(entry -> player.hasLineOfSight(entry) && !EntityUtils.isAlliedTo(player, entry)).sorted(Comparator.comparing(entity -> entity.position().distanceTo(player.position()))).limit((int) relic.getStatValue(stack, "belief", "count")).toList()) {
                     if (target.getStringUUID().equals(player.getStringUUID()))
                         continue;
 
@@ -310,6 +310,7 @@ public class HolyLocketItem extends RelicItem implements IRenderableCurio {
                     essence.setDirectionChoice(MathUtils.randomFloat(player.getRandom()));
                     essence.setTarget(target);
                     essence.setDamage(amount);
+                    essence.setOwner(player);
 
                     level.addFreshEntity(essence);
 
@@ -326,7 +327,8 @@ public class HolyLocketItem extends RelicItem implements IRenderableCurio {
                 for (ServerPlayer playerSearched : level.getEntitiesOfClass(ServerPlayer.class, event.getEntity().getBoundingBox().inflate(32))) {
                     ItemStack stack = EntityUtils.findEquippedCurio(playerSearched, ItemRegistry.HOLY_LOCKET.get());
 
-                    if (!(stack.getItem() instanceof HolyLocketItem relic) || relic.getStatValue(stack, "belief", "radius") < playerSearched.position().distanceTo(event.getEntity().position())
+                    if (EntityUtils.isAlliedTo(playerSearched, entity) || !(stack.getItem() instanceof HolyLocketItem relic)
+                            || relic.getStatValue(stack, "belief", "radius") < playerSearched.position().distanceTo(event.getEntity().position())
                             || !stack.getOrDefault(TOGGLED, true))
                         continue;
 
@@ -337,6 +339,7 @@ public class HolyLocketItem extends RelicItem implements IRenderableCurio {
                     essence.setPos(entity.position().add(0, entity.getBbHeight() / 2, 0));
                     essence.setDirectionChoice(MathUtils.randomFloat(playerSearched.getRandom()));
                     essence.setTarget(playerSearched);
+                    essence.setOwner(playerSearched);
                     essence.setHeal(amount);
 
                     playerSearched.level().addFreshEntity(essence);

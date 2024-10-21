@@ -995,7 +995,7 @@ public interface IRelicItem {
     }
 
     default boolean isAbilityTicking(ItemStack stack, String ability) {
-        return getAbilityExtenderComponent(stack, ability).ticking();
+        return isAbilityUnlocked(stack, ability) && getAbilityExtenderComponent(stack, ability).ticking();
     }
 
     default boolean isAbilityOnCooldown(ItemStack stack, String ability) {

@@ -221,15 +221,15 @@ public class PhantomBootItem extends RelicItem implements IRenderableCurio {
     public LayerDefinition constructLayerDefinition() {
         MeshDefinition mesh = HumanoidModel.createMesh(new CubeDeformation(0.4F), 0.0F);
 
-        PartDefinition right_leg = mesh.getRoot().addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(0, 0).addBox(-2.6F, 5.0F, -2.0F, 5.0F, 7.0F, 5.0F, new CubeDeformation(0.2F))
-                .texOffs(20, 0).addBox(-2.6F, 9.0F, -5.0F, 5.0F, 3.0F, 3.0F, new CubeDeformation(0.205F))
-                .texOffs(0, 12).addBox(-2.6F, 5.0F, -2.0F, 5.0F, 7.0F, 5.0F, new CubeDeformation(0.4F))
-                .texOffs(20, 7).addBox(-2.6F, 9.0F, -5.0F, 5.0F, 3.0F, 3.0F, new CubeDeformation(0.4F)), PartPose.offset(-2.4F, 12.0F, 2.0F));
+        PartDefinition right_leg = mesh.getRoot().addOrReplaceChild("right_leg", CubeListBuilder.create().texOffs(0, 0).addBox(-2.5F, 5.25F, -2.5F, 5.0F, 7.0F, 5.0F, new CubeDeformation(0.0F))
+                .texOffs(20, 0).addBox(-2.5F, 8.25F, -5.5F, 5.0F, 4.0F, 3.0F, new CubeDeformation(0.0F))
+                .texOffs(20, 7).addBox(-2.5F, 8.25F, -5.5F, 5.0F, 4.0F, 3.0F, new CubeDeformation(0.305F))
+                .texOffs(0, 12).addBox(-2.5F, 5.25F, -2.5F, 5.0F, 7.0F, 5.0F, new CubeDeformation(0.3F)), PartPose.offset(-1.0F, 11.75F, 2.5F));
 
-        PartDefinition left_leg = mesh.getRoot().addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(0, 0).addBox(-2.6F, 5.0F, -2.0F, 5.0F, 7.0F, 5.0F, new CubeDeformation(0.2F))
-                .texOffs(20, 0).addBox(-2.6F, 9.0F, -5.0F, 5.0F, 3.0F, 3.0F, new CubeDeformation(0.205F))
-                .texOffs(0, 12).addBox(-2.6F, 5.0F, -2.0F, 5.0F, 7.0F, 5.0F, new CubeDeformation(0.4F))
-                .texOffs(20, 7).addBox(-2.6F, 9.0F, -5.0F, 5.0F, 3.0F, 3.0F, new CubeDeformation(0.4F)), PartPose.offset(-2.4F, 12.0F, 2.0F));
+        PartDefinition left_leg = mesh.getRoot().addOrReplaceChild("left_leg", CubeListBuilder.create().texOffs(0, 0).addBox(-2.5F, 5.25F, -2.5F, 5.0F, 7.0F, 5.0F, new CubeDeformation(0.0F))
+                .texOffs(20, 0).addBox(-2.5F, 8.25F, -5.5F, 5.0F, 4.0F, 3.0F, new CubeDeformation(0.0F))
+                .texOffs(20, 7).addBox(-2.5F, 8.25F, -5.5F, 5.0F, 4.0F, 3.0F, new CubeDeformation(0.305F))
+                .texOffs(0, 12).addBox(-2.5F, 5.25F, -2.5F, 5.0F, 7.0F, 5.0F, new CubeDeformation(0.3F)), PartPose.offset(-1.0F, 11.75F, 2.5F));
 
         return LayerDefinition.create(mesh, 64, 64);
     }

@@ -133,7 +133,7 @@ public class TooltipBorderHandler {
             event.setBorderEnd(tooltip.getBorderBottom());
 
         if (tooltip.getBackgroundTop() != -1)
-            event.setBorderStart(tooltip.getBackgroundTop());
+            event.setBackgroundStart(tooltip.getBackgroundTop());
         if (tooltip.getBackgroundBottom() != -1)
             event.setBackgroundEnd(tooltip.getBackgroundBottom());
     }

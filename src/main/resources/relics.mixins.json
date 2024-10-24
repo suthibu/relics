@@ -6,6 +6,7 @@
   "mixins": [
     "AbstractChestedHorseMixin",
     "AbstractContainerMenuMixin",
+    "BlockMixin",
     "EnderManMixin",
     "EntityMixin",
     "GameDataMixin",

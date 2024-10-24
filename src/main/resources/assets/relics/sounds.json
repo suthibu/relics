@@ -58,5 +58,9 @@
     "finish_research": {
         "category": "master",
         "sounds": [ { "name": "relics:finish_research" } ]
+    },
+    "spring_boing": {
+        "category": "master",
+        "sounds": [ { "name": "relics:spring_boing" } ]
     }
 }

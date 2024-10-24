@@ -482,6 +482,13 @@
   "tooltip.relics.phantom_boot.ability.bridge.stat.duration.title": "Maximum standing duration:",
   "tooltip.relics.phantom_boot.ability.bridge.stat.duration.value": "%1$s seconds.",
 
+  "item.relics.springy_boot": "Springy Boot",
+  "tooltip.relics.springy_boot.description": "Grants the relic owner a special bounciness, allowing them to bounce off any solid surface.",
+  "tooltip.relics.springy_boot.ability.bounce": "Bounciness",
+  "tooltip.relics.springy_boot.ability.bounce.description": "When the ability is active, all solid blocks gain bounciness, allowing the player to bounce off them when falling. Upon activation, the player is launched into the air with a force based on the current bounciness.",
+  "tooltip.relics.springy_boot.ability.bounce.stat.power.title": "Additional Bounciness:",
+  "tooltip.relics.springy_boot.ability.bounce.stat.power.value": "+%1$s%%",
+
   "item.relics.leafy_ring": "Leafy Ring [WIP]",
   "tooltip.relics.leafy_ring.description": "[WIP]",
 

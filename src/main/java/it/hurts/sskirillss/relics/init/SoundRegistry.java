@@ -17,6 +17,7 @@ public class SoundRegistry {
     public static final DeferredHolder<SoundEvent, SoundEvent> SPURT = SOUNDS.register("spurt", () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(Reference.MODID, "spurt")));
     public static final DeferredHolder<SoundEvent, SoundEvent> POWERED_ARROW = SOUNDS.register("powered_arrow", () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(Reference.MODID, "powered_arrow")));
     public static final DeferredHolder<SoundEvent, SoundEvent> LEAP = SOUNDS.register("leap", () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(Reference.MODID, "leap")));
+    public static final DeferredHolder<SoundEvent, SoundEvent> SPRING_BOING = SOUNDS.register("spring_boing", () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(Reference.MODID, "spring_boing")));
 
     public static final DeferredHolder<SoundEvent, SoundEvent> TABLE_UPGRADE = SOUNDS.register("table_upgrade", () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(Reference.MODID, "table_upgrade")));
     public static final DeferredHolder<SoundEvent, SoundEvent> TABLE_REROLL = SOUNDS.register("table_reroll", () -> SoundEvent.createVariableRangeEvent(ResourceLocation.fromNamespaceAndPath(Reference.MODID, "table_reroll")));

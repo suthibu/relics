@@ -65,6 +65,7 @@ public class ItemRegistry {
     // NEW GEN
     public static final DeferredHolder<Item, RelicItem> LEAFY_RING = ITEMS.register("leafy_ring", LeafyRingItem::new);
     public static final DeferredHolder<Item, RelicItem> PHANTOM_BOOT = ITEMS.register("phantom_boot", PhantomBootItem::new);
+    public static final DeferredHolder<Item, RelicItem> SPRINGY_BOOT = ITEMS.register("springy_boot", SpringyBootItem::new);
 
     public static void register(IEventBus bus) {
         ITEMS.register(bus);

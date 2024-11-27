@@ -460,7 +460,7 @@ public class AbilityResearchScreen extends Screen implements IAutoScaledScreen, 
         float offset = (float) (Math.sin(((minecraft.player.tickCount + partialTick + start.length()) * 0.2F)) * 0.1F);
         float color = 1.25F + offset;
 
-        if (!relic.isAbilityResearched(stack, ability) && isHoveringConnection(start, end, mouseX, mouseY) && stars.stream().noneMatch(AbstractWidget::isHovered))
+        if (!relic.isAbilityResearched(stack, ability) && isHoveringConnection(start, end, mouseX, mouseY))
             RenderSystem.setShaderColor(color, 0.25F, 0.25F, 0.75F + offset);
         else
             RenderSystem.setShaderColor(color, color, color, 0.75F + offset);
@@ -511,7 +511,7 @@ public class AbilityResearchScreen extends Screen implements IAutoScaledScreen, 
     }
 
     private boolean isHoveringConnection(Vec2 start, Vec2 end, int mouseX, int mouseY) {
-        float minDistance = 7F;
+        float minDistance = 4F;
         float thickness = 4F;
 
         float x1 = start.x;
@@ -565,7 +565,7 @@ public class AbilityResearchScreen extends Screen implements IAutoScaledScreen, 
 
     @Override
     public boolean mouseClicked(double pMouseX, double pMouseY, int pButton) {
-        if (stack.getItem() instanceof IRelicItem relic && !relic.isAbilityResearched(stack, ability) && pButton == GLFW.GLFW_MOUSE_BUTTON_LEFT && stars.stream().noneMatch(AbstractWidget::isHovered)) {
+        if (stack.getItem() instanceof IRelicItem relic && !relic.isAbilityResearched(stack, ability) && pButton == GLFW.GLFW_MOUSE_BUTTON_LEFT) {
             ResearchData researchData = relic.getResearchData(ability);
 
             Pair<Integer, Integer> toRemove = null;

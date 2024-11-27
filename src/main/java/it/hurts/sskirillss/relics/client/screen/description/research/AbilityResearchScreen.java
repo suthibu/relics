@@ -10,16 +10,17 @@ import it.hurts.sskirillss.relics.client.screen.base.IAutoScaledScreen;
 import it.hurts.sskirillss.relics.client.screen.base.IHoverableWidget;
 import it.hurts.sskirillss.relics.client.screen.base.IRelicScreenProvider;
 import it.hurts.sskirillss.relics.client.screen.description.general.widgets.*;
+import it.hurts.sskirillss.relics.client.screen.description.misc.DescriptionCache;
 import it.hurts.sskirillss.relics.client.screen.description.misc.DescriptionTextures;
 import it.hurts.sskirillss.relics.client.screen.description.misc.DescriptionUtils;
 import it.hurts.sskirillss.relics.client.screen.description.relic.RelicDescriptionScreen;
 import it.hurts.sskirillss.relics.client.screen.description.research.misc.BurnPoint;
 import it.hurts.sskirillss.relics.client.screen.description.research.particles.ResearchParticleData;
-import it.hurts.sskirillss.relics.client.screen.description.research.particles.SmokeParticleData;
 import it.hurts.sskirillss.relics.client.screen.description.research.widgets.HintWidget;
 import it.hurts.sskirillss.relics.client.screen.description.research.widgets.StarWidget;
 import it.hurts.sskirillss.relics.client.screen.description.research.widgets.TipWidget;
 import it.hurts.sskirillss.relics.client.screen.utils.ParticleStorage;
+import it.hurts.sskirillss.relics.client.screen.utils.ScreenUtils;
 import it.hurts.sskirillss.relics.init.SoundRegistry;
 import it.hurts.sskirillss.relics.items.relics.base.IRelicItem;
 import it.hurts.sskirillss.relics.items.relics.base.data.RelicData;
@@ -44,8 +45,9 @@ import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.client.resources.sounds.SimpleSoundInstance;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.Mth;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
@@ -158,14 +160,6 @@ public class AbilityResearchScreen extends Screen implements IAutoScaledScreen, 
 
         for (var entry : relic.getAbilityData(ability).getResearchData().getStars().values())
             stars.add(this.addWidget(new StarWidget((int) (x + 67 + (entry.getX() * 5F) - starSize / 2F), (int) (y + 54 + (entry.getY() * 5F) - starSize / 2F), this, entry)));
-
-        if (!relic.isAbilityResearched(stack, ability)) {
-            RandomSource random = minecraft.player.getRandom();
-
-            for (int i = 0; i < 50; i++)
-                ParticleStorage.addParticle(this, new SmokeParticleData(x + 190 + random.nextInt(90), y + 67 + random.nextInt((int) (minecraft.font.lineHeight * 0.77F)), 1F + (random.nextFloat() * 0.25F), 20 + random.nextInt(40), 0F)
-                        .setDeltaX(MathUtils.randomFloat(random) * 0.25F).setDeltaY(MathUtils.randomFloat(random) * 0.25F));
-        }
     }
 
     @Override
@@ -197,10 +191,6 @@ public class AbilityResearchScreen extends Screen implements IAutoScaledScreen, 
                     }
                 }
             }
-        } else {
-            for (int i = 0; i < 3; i++)
-                ParticleStorage.addParticle(this, new SmokeParticleData(x + 190 + random.nextInt(90), y + 67 + random.nextInt((int) (minecraft.font.lineHeight * 0.77F)), 1F + (random.nextFloat() * 0.25F), 20 + random.nextInt(40), 0.1F)
-                        .setDeltaX(MathUtils.randomFloat(random) * 0.25F).setDeltaY(MathUtils.randomFloat(random) * 0.25F));
         }
 
         if (minecraft.player.tickCount % 3 == 0) {
@@ -412,37 +402,77 @@ public class AbilityResearchScreen extends Screen implements IAutoScaledScreen, 
         {
             poseStack.pushPose();
 
-            MutableComponent title = Component.translatableWithFallback("tooltip.relics." + BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath() + ".ability." + ability, ability).withStyle(ChatFormatting.BOLD);
+            var title = Component.translatableWithFallback("tooltip.relics." + BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath() + ".ability." + ability, ability);
+
+            if (!relic.isAbilityUnlocked(stack, ability)) {
+                title = ScreenUtils.stylizeWidthReplacement(title, 1F, Style.EMPTY.withFont(ScreenUtils.ILLAGER_ALT_FONT).withColor(0x9E00B0), ability.length());
+
+                var random = player.getRandom();
+
+                var shakeX = MathUtils.randomFloat(random) * 0.5F;
+                var shakeY = MathUtils.randomFloat(random) * 0.5F;
+
+                poseStack.translate(shakeX, shakeY, 0F);
+            } else
+                title.withStyle(ChatFormatting.BOLD);
 
             poseStack.translate((int) (x + 184 + (102 / 2F) - (minecraft.font.width(title) / 2F / 1.3F)), y + 68, 0F);
 
             poseStack.scale(0.75F, 0.75F, 1F);
 
-            if (!relic.isAbilityResearched(stack, ability))
-                title.withStyle(ChatFormatting.OBFUSCATED);
-
-            guiGraphics.drawString(minecraft.font, title, 0, 0, 0x662f13, false);
+            guiGraphics.drawString(minecraft.font, title, 0, 0, DescriptionUtils.TEXT_COLOR, false);
 
             poseStack.popPose();
         }
 
-//        {
-//            poseStack.pushPose();
-//
-//            poseStack.translate(x + 184 + (102 / 2F), y + 100, 0F);
-//
-//            poseStack.scale(0.5F, 0.5F, 1F);
-//
-//            int yOff = 0;
-//
-//            for (FormattedCharSequence line : minecraft.font.split(ScreenUtils.obfuscate(Component.translatable("tooltip.relics." + BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath() + ".ability." + ability + ".description"), 1D - relic.testAbilityResearchPercentage(stack, ability), minecraft.level.getGameTime() / 5), 180)) {
-//                guiGraphics.drawString(minecraft.font, line, -(minecraft.font.width(line) / 2F), yOff, 0x662f13, false);
-//
-//                yOff += 9;
-//            }
-//
-//            poseStack.popPose();
-//        }
+        {
+            poseStack.pushPose();
+
+            poseStack.translate(x + 184 + (102 / 2F), y + 100, 0F);
+
+            poseStack.scale(0.5F, 0.5F, 1F);
+
+            int yOff = 0;
+
+            List<Number> placeholders = new ArrayList<>();
+
+            for (var stat : relic.getAbilityData(ability).getStats().values())
+                placeholders.add(stat.getFormatValue().apply(relic.getStatValue(stack, ability, stat.getId(), relic.getAbilityLevel(stack, ability))));
+
+            var component = Component.translatable("tooltip.relics." + BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath() + ".ability." + ability + ".description", placeholders.toArray());
+
+            var startColor = 0xE500FF;
+            var endColor = DescriptionUtils.TEXT_COLOR;
+
+            float progress = (float) researchProgress / maxResearchProgress;
+
+            int startRed = (startColor >> 16) & 0xFF;
+            int startGreen = (startColor >> 8) & 0xFF;
+            int startBlue = startColor & 0xFF;
+
+            int endRed = (endColor >> 16) & 0xFF;
+            int endGreen = (endColor >> 8) & 0xFF;
+            int endBlue = endColor & 0xFF;
+
+            int red = (int) (startRed + (endRed - startRed) * progress);
+            int green = (int) (startGreen + (endGreen - startGreen) * progress);
+            int blue = (int) (startBlue + (endBlue - startBlue) * progress);
+
+            int color = (red << 16) | (green << 8) | blue;
+
+            if (researchProgress < maxResearchProgress)
+                component.withColor(color);
+
+            component = ScreenUtils.stylizeWidthReplacement(component, 1F - progress, Style.EMPTY.withFont(ScreenUtils.ILLAGER_ALT_FONT), ability.length());
+
+            for (FormattedCharSequence line : minecraft.font.split(component, 180)) {
+                guiGraphics.drawString(minecraft.font, line, -(minecraft.font.width(line) / 2F), yOff, DescriptionUtils.TEXT_COLOR, false);
+
+                yOff += 9;
+            }
+
+            poseStack.popPose();
+        }
     }
 
     public Vec2 getScaledPos(Vec2 pos) {
@@ -649,9 +679,7 @@ public class AbilityResearchScreen extends Screen implements IAutoScaledScreen, 
 
     @Override
     public void onClose() {
-        minecraft.setScreen(new RelicDescriptionScreen(minecraft.player, container, slot, screen));
-
-        ParticleStorage.getParticlesData().clear();
+        minecraft.setScreen(screen);
     }
 
     @Override

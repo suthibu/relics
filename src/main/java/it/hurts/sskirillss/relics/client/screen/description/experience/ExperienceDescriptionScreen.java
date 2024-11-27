@@ -1,22 +1,24 @@
-package it.hurts.sskirillss.relics.client.screen.description.relic;
+package it.hurts.sskirillss.relics.client.screen.description.experience;
 
 import com.mojang.blaze3d.platform.InputConstants;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.math.Axis;
 import it.hurts.sskirillss.relics.badges.base.RelicBadge;
 import it.hurts.sskirillss.relics.client.screen.base.IAutoScaledScreen;
 import it.hurts.sskirillss.relics.client.screen.base.IHoverableWidget;
 import it.hurts.sskirillss.relics.client.screen.base.IRelicScreenProvider;
 import it.hurts.sskirillss.relics.client.screen.base.IPagedDescriptionScreen;
 import it.hurts.sskirillss.relics.client.screen.description.ability.AbilityDescriptionScreen;
-import it.hurts.sskirillss.relics.client.screen.description.experience.ExperienceDescriptionScreen;
+import it.hurts.sskirillss.relics.client.screen.description.experience.widgets.ExperienceGemWidget;
 import it.hurts.sskirillss.relics.client.screen.description.general.misc.DescriptionPage;
 import it.hurts.sskirillss.relics.client.screen.description.general.widgets.*;
 import it.hurts.sskirillss.relics.client.screen.description.general.widgets.PageWidget;
+import it.hurts.sskirillss.relics.client.screen.description.misc.DescriptionCache;
 import it.hurts.sskirillss.relics.client.screen.description.misc.DescriptionTextures;
 import it.hurts.sskirillss.relics.client.screen.description.misc.DescriptionUtils;
+import it.hurts.sskirillss.relics.client.screen.description.relic.RelicDescriptionScreen;
 import it.hurts.sskirillss.relics.client.screen.description.relic.particles.ExperienceParticleData;
-import it.hurts.sskirillss.relics.client.screen.description.relic.widgets.BigRelicCardWidget;
 import it.hurts.sskirillss.relics.client.screen.description.relic.widgets.RelicExperienceWidget;
 import it.hurts.sskirillss.relics.client.screen.utils.ParticleStorage;
 import it.hurts.sskirillss.relics.init.BadgeRegistry;
@@ -35,6 +37,7 @@ import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.player.LocalPlayer;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
 import net.minecraft.util.FormattedCharSequence;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.entity.player.Player;
@@ -44,9 +47,10 @@ import net.neoforged.api.distmarker.OnlyIn;
 import net.neoforged.neoforge.registries.DeferredHolder;
 
 import java.awt.*;
+import java.util.Set;
 
 @OnlyIn(Dist.CLIENT)
-public class RelicDescriptionScreen extends Screen implements IAutoScaledScreen, IRelicScreenProvider, IPagedDescriptionScreen {
+public class ExperienceDescriptionScreen extends Screen implements IAutoScaledScreen, IRelicScreenProvider, IPagedDescriptionScreen {
     public final Screen screen;
 
     @Getter
@@ -59,7 +63,7 @@ public class RelicDescriptionScreen extends Screen implements IAutoScaledScreen,
     private final int backgroundHeight = 256;
     private final int backgroundWidth = 418;
 
-    public RelicDescriptionScreen(Player player, int container, int slot, Screen screen) {
+    public ExperienceDescriptionScreen(Player player, int container, int slot, Screen screen) {
         super(Component.empty());
 
         this.container = container;
@@ -67,6 +71,14 @@ public class RelicDescriptionScreen extends Screen implements IAutoScaledScreen,
         this.screen = screen;
 
         stack = DescriptionUtils.gatherRelicStack(player, slot);
+    }
+
+    public String getSelectedSource() {
+        return DescriptionCache.getSelectedExperienceSource((IRelicItem) stack.getItem());
+    }
+
+    public void setSelectedSource(String source) {
+        DescriptionCache.setSelectedExperienceSource((IRelicItem) stack.getItem(), source);
     }
 
     @Override
@@ -83,7 +95,7 @@ public class RelicDescriptionScreen extends Screen implements IAutoScaledScreen,
         this.addRenderableWidget(new PageWidget(x + 100, y + 123, this, DescriptionPage.ABILITY, new AbilityDescriptionScreen(minecraft.player, this.container, this.slot, this.screen)));
         this.addRenderableWidget(new PageWidget(x + 119, y + 123, this, DescriptionPage.EXPERIENCE, new ExperienceDescriptionScreen(minecraft.player, this.container, this.slot, this.screen)));
 
-        this.addRenderableWidget(new BigRelicCardWidget(x + 60, y + 47, this));
+        //this.addRenderableWidget(new BigRelicCardWidget(x + 60, y + 47, this));
 
         this.addRenderableWidget(new LogoWidget(x + 313, y + 57, this));
 
@@ -103,6 +115,23 @@ public class RelicDescriptionScreen extends Screen implements IAutoScaledScreen,
             this.addRenderableWidget(new RelicBadgeWidget(x + 270 - xOff, y + 63, this, badge));
 
             xOff += 15;
+        }
+
+        Set<String> sources = relic.getLevelingData().getSources().getSources().keySet();
+
+        int cardWidth = 30;
+        int containerWidth = 209;
+
+        int count = Math.min(5, sources.size());
+
+        int spacing = cardWidth + 8 + (3 * (5 - count));
+
+        xOff = (containerWidth / 2) - (((cardWidth * count) + ((spacing - cardWidth) * Math.max(count - 1, 0))) / 2);
+
+        for (String entry : sources) {
+            this.addRenderableWidget(new ExperienceGemWidget(x + 77 + xOff, y + 153, this, entry));
+
+            xOff += spacing;
         }
 
         this.addRenderableWidget(new RelicExperienceWidget(x + 142, y + 121, this));
@@ -187,9 +216,50 @@ public class RelicDescriptionScreen extends Screen implements IAutoScaledScreen,
                 .pos(x + 60, y + 133)
                 .end();
 
+        int quality = relic.getRelicQuality(stack);
+        boolean isAliquot = quality % 2 == 1;
+
+        for (int i = 0; i < Math.floor(quality / 2D); i++) {
+            GUIRenderer.begin(DescriptionTextures.BIG_STAR_ACTIVE, poseStack)
+                    .anchor(SpriteAnchor.TOP_LEFT)
+                    .pos(x + xOff + 64, y + 110)
+                    .end();
+
+            xOff += 8;
+        }
+
+        if (isAliquot)
+            GUIRenderer.begin(DescriptionTextures.BIG_STAR_ACTIVE, poseStack)
+                    .anchor(SpriteAnchor.TOP_LEFT)
+                    .pos(x + xOff + 64, y + 110)
+                    .patternSize(4, 7)
+                    .texSize(8, 7)
+                    .end();
+
         poseStack.pushPose();
 
+        float scale = 1.75F;
+
+        poseStack.translate(x + 70 + 8 * scale, y + 69 + Math.sin((player.tickCount + pPartialTick) * 0.1F) * 2F + 8 * scale, 0);
+
+        poseStack.mulPose(Axis.ZP.rotationDegrees((float) Math.cos((player.tickCount + pPartialTick) * 0.05F) * 5F));
+        poseStack.mulPose(Axis.YP.rotationDegrees((float) Math.cos((player.tickCount + pPartialTick) * 0.075F) * 25F));
+
+        poseStack.translate(-8 * scale, -8 * scale, -150 * scale);
+
+        poseStack.scale(scale, scale, scale);
+
+        guiGraphics.renderItem(stack, 0, 0);
+
+        poseStack.popPose();
+
+        poseStack.pushPose();
+
+        MutableComponent levelComponent = Component.literal(String.valueOf(level)).withStyle(ChatFormatting.BOLD);
+
         poseStack.scale(0.75F, 0.75F, 1F);
+
+        guiGraphics.drawString(minecraft.font, levelComponent, (int) (((x + 85.5F) * 1.33F) - (minecraft.font.width(levelComponent) / 2F)), (int) ((y + 51) * 1.33F), 0xFFE278, true);
 
         guiGraphics.drawString(minecraft.font, Component.literal(stack.getDisplayName().getString()
                         .replace("[", "").replace("]", ""))
@@ -259,6 +329,6 @@ public class RelicDescriptionScreen extends Screen implements IAutoScaledScreen,
 
     @Override
     public DescriptionPage getPage() {
-        return DescriptionPage.RELIC;
+        return DescriptionPage.EXPERIENCE;
     }
 }

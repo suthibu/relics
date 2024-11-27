@@ -1,4 +1,4 @@
-package it.hurts.sskirillss.relics.client.screen.description.relic.widgets;
+package it.hurts.sskirillss.relics.client.screen.description.ability.widgets;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;
@@ -6,11 +6,10 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.math.Axis;
 import it.hurts.sskirillss.relics.client.screen.base.IHoverableWidget;
 import it.hurts.sskirillss.relics.client.screen.base.ITickingWidget;
-import it.hurts.sskirillss.relics.client.screen.description.ability.AbilityDescriptionScreen;
 import it.hurts.sskirillss.relics.client.screen.description.general.widgets.base.AbstractDescriptionWidget;
 import it.hurts.sskirillss.relics.client.screen.description.misc.DescriptionTextures;
 import it.hurts.sskirillss.relics.client.screen.description.misc.DescriptionUtils;
-import it.hurts.sskirillss.relics.client.screen.description.relic.RelicDescriptionScreen;
+import it.hurts.sskirillss.relics.client.screen.description.ability.AbilityDescriptionScreen;
 import it.hurts.sskirillss.relics.client.screen.description.relic.particles.ChainParticleData;
 import it.hurts.sskirillss.relics.client.screen.description.relic.particles.ExperienceParticleData;
 import it.hurts.sskirillss.relics.client.screen.description.relic.particles.SparkParticleData;
@@ -34,6 +33,7 @@ import net.minecraft.client.sounds.SoundManager;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.Style;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.sounds.SoundEvents;
 import net.minecraft.util.FormattedCharSequence;
@@ -47,7 +47,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AbilityCardWidget extends AbstractDescriptionWidget implements IHoverableWidget, ITickingWidget {
-    private final RelicDescriptionScreen screen;
+    private final AbilityDescriptionScreen screen;
     private final String ability;
 
     private float scale = 1F;
@@ -56,7 +56,7 @@ public class AbilityCardWidget extends AbstractDescriptionWidget implements IHov
     private int shakeDelta = 0;
     private int colorDelta = 0;
 
-    public AbilityCardWidget(int x, int y, RelicDescriptionScreen screen, String ability) {
+    public AbilityCardWidget(int x, int y, AbilityDescriptionScreen screen, String ability) {
         super(x, y, 32, 47);
 
         this.screen = screen;
@@ -79,9 +79,9 @@ public class AbilityCardWidget extends AbstractDescriptionWidget implements IHov
         if (isEnoughLevel) {
             if (isLockUnlocked) {
                 if (isAbilityResearched)
-                    minecraft.setScreen(new AbilityDescriptionScreen(minecraft.player, screen.container, screen.slot, screen.screen, ability));
+                    screen.setSelectedAbility(ability);
                 else
-                    minecraft.setScreen(new AbilityResearchScreen(minecraft.player, screen.container, screen.slot, screen.screen, ability));
+                    minecraft.setScreen(new AbilityResearchScreen(minecraft.player, screen.container, screen.slot, screen, ability));
             } else {
                 int unlocks = relic.getLockUnlocks(stack, ability) + 1;
 
@@ -309,7 +309,7 @@ public class AbilityCardWidget extends AbstractDescriptionWidget implements IHov
         if (!(screen.stack.getItem() instanceof IRelicItem relic))
             return;
 
-        float maxScale = 1.1F;
+        float maxScale = 1.15F;
         float minScale = 1F;
 
         RandomSource random = minecraft.player.getRandom();
@@ -349,8 +349,15 @@ public class AbilityCardWidget extends AbstractDescriptionWidget implements IHov
     }
 
     @Override
+    public boolean isLocked() {
+        return screen.getSelectedAbility().equals(ability);
+    }
+
+    @Override
     public void onHovered(GuiGraphics guiGraphics, int mouseX, int mouseY) {
-        if (!(screen.stack.getItem() instanceof IRelicItem relic))
+        var stack = screen.stack;
+
+        if (!(stack.getItem() instanceof IRelicItem relic))
             return;
 
         AbilityData data = relic.getAbilityData(ability);
@@ -362,17 +369,14 @@ public class AbilityCardWidget extends AbstractDescriptionWidget implements IHov
 
         List<FormattedCharSequence> tooltip = Lists.newArrayList();
 
+        var title = Component.translatableWithFallback("tooltip.relics." + BuiltInRegistries.ITEM.getKey(stack.getItem()).getPath() + ".ability." + ability, ability);
+
         int maxWidth = 110;
-        int renderWidth = 0;
+        int renderWidth = Math.min((minecraft.font.width(title.withStyle(ChatFormatting.BOLD)) / 2) + 4, maxWidth);
 
         List<MutableComponent> entries = new ArrayList<>();
 
-        MutableComponent title = Component.translatableWithFallback("tooltip.relics." + BuiltInRegistries.ITEM.getKey(screen.stack.getItem()).getPath() + ".ability." + ability, ability).withStyle(ChatFormatting.BOLD).withStyle(ChatFormatting.UNDERLINE);
-
-        if (!relic.isAbilityUnlocked(screen.stack, ability))
-            title = ScreenUtils.obfuscate(title, 0.99F, minecraft.level.getGameTime() / 5);
-
-        entries.add(title);
+        entries.add(Component.literal(" "));
 
         int level = relic.getRelicLevel(screen.stack);
         int requiredLevel = data.getRequiredLevel();
@@ -409,7 +413,7 @@ public class AbilityCardWidget extends AbstractDescriptionWidget implements IHov
             int entryWidth = (minecraft.font.width(entry)) / 2;
 
             if (entryWidth > renderWidth)
-                renderWidth = Math.min(entryWidth + 2, maxWidth);
+                renderWidth = Math.min(entryWidth + 4, maxWidth);
 
             tooltip.addAll(minecraft.font.split(entry, maxWidth * 2));
         }
@@ -430,12 +434,33 @@ public class AbilityCardWidget extends AbstractDescriptionWidget implements IHov
 
         int yOff = 0;
 
+        poseStack.pushPose();
+
+        poseStack.scale(0.5F, 0.5F, 0.5F);
+
+        if (!relic.isAbilityUnlocked(stack, ability)) {
+            title = ScreenUtils.stylizeWidthReplacement(title, 1F, Style.EMPTY.withFont(ScreenUtils.ILLAGER_ALT_FONT).withColor(0x9E00B0), ability.length());
+
+            var random = minecraft.player.getRandom();
+
+            var shakeX = MathUtils.randomFloat(random) * 0.5F;
+            var shakeY = MathUtils.randomFloat(random) * 0.5F;
+
+            poseStack.translate(shakeX, shakeY, 0F);
+
+        } else
+            title.withStyle(ChatFormatting.BOLD);
+
+        guiGraphics.drawString(minecraft.font, title, -(minecraft.font.width(title) / 2), ((y + yOff + 9) * 2), DescriptionUtils.TEXT_COLOR, false);
+
+        poseStack.popPose();
+
         for (FormattedCharSequence entry : tooltip) {
             poseStack.pushPose();
 
             poseStack.scale(0.5F, 0.5F, 0.5F);
 
-            guiGraphics.drawString(minecraft.font, entry, -(minecraft.font.width(entry) / 2), ((y + yOff + 9) * 2), 0x662f13, false);
+            guiGraphics.drawString(minecraft.font, entry, -(minecraft.font.width(entry) / 2), ((y + yOff + 9) * 2), DescriptionUtils.TEXT_COLOR, false);
 
             yOff += 5;
 
@@ -445,7 +470,7 @@ public class AbilityCardWidget extends AbstractDescriptionWidget implements IHov
 
     @Override
     public void playDownSound(SoundManager handler) {
-        if (screen.getStack().getItem() instanceof IRelicItem relic && relic.isAbilityUnlocked(screen.stack, ability))
+        if (!isLocked() && screen.getStack().getItem() instanceof IRelicItem relic && relic.isAbilityUnlocked(screen.stack, ability))
             super.playDownSound(handler);
     }
 }

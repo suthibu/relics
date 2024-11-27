@@ -1,4 +1,4 @@
-package it.hurts.sskirillss.relics.client.screen.description.relic.widgets;
+package it.hurts.sskirillss.relics.client.screen.description.ability.widgets;
 
 import com.google.common.collect.Lists;
 import com.mojang.blaze3d.systems.RenderSystem;

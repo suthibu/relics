@@ -255,9 +255,9 @@ public class AbilityDescriptionScreen extends Screen implements IAutoScaledScree
         if (relic.isAbilityUnlocked(stack, ability)) {
             List<MutableComponent> components = new ArrayList<>();
 
-            var wantsUpgrade = upgradeButton.isHovered() && relic.mayUpgrade(stack, ability);
-            var wantsReroll = rerollButton.isHovered() && relic.mayReroll(stack, ability);
-            var wantsReset = resetButton.isHovered() && relic.mayReset(stack, ability);
+            var wantsUpgrade = upgradeButton != null && upgradeButton.isHovered() && relic.mayUpgrade(stack, ability);
+            var wantsReroll = rerollButton != null && rerollButton.isHovered() && relic.mayReroll(stack, ability);
+            var wantsReset = resetButton != null && resetButton.isHovered() && relic.mayReset(stack, ability);
 
             int color = DescriptionUtils.TEXT_COLOR;
 

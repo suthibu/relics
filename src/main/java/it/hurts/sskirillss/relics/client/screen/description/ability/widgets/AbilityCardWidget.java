@@ -81,7 +81,7 @@ public class AbilityCardWidget extends AbstractDescriptionWidget implements IHov
                 if (isAbilityResearched)
                     screen.setSelectedAbility(ability);
                 else
-                    minecraft.setScreen(new AbilityResearchScreen(minecraft.player, screen.container, screen.slot, screen.screen, ability));
+                    minecraft.setScreen(new AbilityResearchScreen(minecraft.player, screen.container, screen.slot, screen, ability));
             } else {
                 int unlocks = relic.getLockUnlocks(stack, ability) + 1;
 

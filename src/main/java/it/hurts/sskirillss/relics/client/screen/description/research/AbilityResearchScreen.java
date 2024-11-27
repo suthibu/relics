@@ -10,6 +10,7 @@ import it.hurts.sskirillss.relics.client.screen.base.IAutoScaledScreen;
 import it.hurts.sskirillss.relics.client.screen.base.IHoverableWidget;
 import it.hurts.sskirillss.relics.client.screen.base.IRelicScreenProvider;
 import it.hurts.sskirillss.relics.client.screen.description.general.widgets.*;
+import it.hurts.sskirillss.relics.client.screen.description.misc.DescriptionCache;
 import it.hurts.sskirillss.relics.client.screen.description.misc.DescriptionTextures;
 import it.hurts.sskirillss.relics.client.screen.description.misc.DescriptionUtils;
 import it.hurts.sskirillss.relics.client.screen.description.relic.RelicDescriptionScreen;
@@ -678,7 +679,7 @@ public class AbilityResearchScreen extends Screen implements IAutoScaledScreen, 
 
     @Override
     public void onClose() {
-        minecraft.setScreen(new RelicDescriptionScreen(minecraft.player, container, slot, screen));
+        minecraft.setScreen(screen);
     }
 
     @Override

@@ -6,8 +6,8 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import it.hurts.sskirillss.relics.badges.base.AbilityBadge;
 import it.hurts.sskirillss.relics.client.screen.base.IAutoScaledScreen;
 import it.hurts.sskirillss.relics.client.screen.base.IHoverableWidget;
+import it.hurts.sskirillss.relics.client.screen.base.IPagedDescriptionScreen;
 import it.hurts.sskirillss.relics.client.screen.base.IRelicScreenProvider;
-import it.hurts.sskirillss.relics.client.screen.base.ITabbedDescriptionScreen;
 import it.hurts.sskirillss.relics.client.screen.description.ability.widgets.*;
 import it.hurts.sskirillss.relics.client.screen.description.experience.ExperienceDescriptionScreen;
 import it.hurts.sskirillss.relics.client.screen.description.general.misc.DescriptionPage;
@@ -52,7 +52,7 @@ import java.util.Set;
 import java.util.regex.Pattern;
 
 @OnlyIn(Dist.CLIENT)
-public class AbilityDescriptionScreen extends Screen implements IAutoScaledScreen, IRelicScreenProvider, ITabbedDescriptionScreen {
+public class AbilityDescriptionScreen extends Screen implements IAutoScaledScreen, IRelicScreenProvider, IPagedDescriptionScreen {
     public final Screen screen;
 
     @Getter
@@ -91,6 +91,8 @@ public class AbilityDescriptionScreen extends Screen implements IAutoScaledScree
     protected void init() {
         if (stack == null || !(stack.getItem() instanceof IRelicItem relic))
             return;
+
+        updateCache(relic);
 
         var ability = getSelectedAbility();
 

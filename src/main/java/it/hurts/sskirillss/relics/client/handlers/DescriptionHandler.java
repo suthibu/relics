@@ -1,8 +1,12 @@
 package it.hurts.sskirillss.relics.client.handlers;
 
 import com.mojang.blaze3d.platform.Window;
-import it.hurts.sskirillss.relics.client.screen.description.relic.RelicDescriptionScreen;
+import it.hurts.sskirillss.relics.client.screen.base.IRelicScreenProvider;
+import it.hurts.sskirillss.relics.client.screen.description.ability.AbilityDescriptionScreen;
+import it.hurts.sskirillss.relics.client.screen.description.experience.ExperienceDescriptionScreen;
+import it.hurts.sskirillss.relics.client.screen.description.misc.DescriptionCache;
 import it.hurts.sskirillss.relics.client.screen.description.misc.DescriptionUtils;
+import it.hurts.sskirillss.relics.client.screen.description.relic.RelicDescriptionScreen;
 import it.hurts.sskirillss.relics.items.relics.base.IRelicItem;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
@@ -24,7 +28,7 @@ import net.neoforged.neoforge.event.tick.PlayerTickEvent;
 
 @EventBusSubscriber(value = Dist.CLIENT)
 public class DescriptionHandler {
-    private static final int REQUIRED_TIME = 20;
+    private static final int REQUIRED_TIME = 10;
 
     private static int ticksCount;
 
@@ -71,16 +75,20 @@ public class DescriptionHandler {
 
         ItemStack stack = slot.getItem();
 
-        if (!(stack.getItem() instanceof IRelicItem))
+        if (!(stack.getItem() instanceof IRelicItem relic))
             return;
 
         if (hasShiftDown) {
             ticksCount++;
 
             if (ticksCount >= REQUIRED_TIME) {
-                RelicDescriptionScreen descriptionScreen = new RelicDescriptionScreen(player, player.containerMenu.containerId, id, Minecraft.getInstance().screen);
+                Screen descriptionScreen;
 
-                descriptionScreen.stack = DescriptionUtils.gatherRelicStack(player, id);
+                switch (DescriptionCache.getEntry(relic).getSelectedPage()) {
+                    case ABILITY -> descriptionScreen = new AbilityDescriptionScreen(player, player.containerMenu.containerId, id, screen);
+                    case EXPERIENCE -> descriptionScreen = new ExperienceDescriptionScreen(player, player.containerMenu.containerId, id, screen);
+                    default -> descriptionScreen = new RelicDescriptionScreen(player, player.containerMenu.containerId, id, screen);
+                }
 
                 Minecraft.getInstance().setScreen(descriptionScreen);
 

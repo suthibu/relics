@@ -8,9 +8,8 @@ import it.hurts.sskirillss.relics.badges.base.RelicBadge;
 import it.hurts.sskirillss.relics.client.screen.base.IAutoScaledScreen;
 import it.hurts.sskirillss.relics.client.screen.base.IHoverableWidget;
 import it.hurts.sskirillss.relics.client.screen.base.IRelicScreenProvider;
-import it.hurts.sskirillss.relics.client.screen.base.ITabbedDescriptionScreen;
+import it.hurts.sskirillss.relics.client.screen.base.IPagedDescriptionScreen;
 import it.hurts.sskirillss.relics.client.screen.description.ability.AbilityDescriptionScreen;
-import it.hurts.sskirillss.relics.client.screen.description.ability.widgets.AbilityCardWidget;
 import it.hurts.sskirillss.relics.client.screen.description.experience.widgets.ExperienceGemWidget;
 import it.hurts.sskirillss.relics.client.screen.description.general.misc.DescriptionPage;
 import it.hurts.sskirillss.relics.client.screen.description.general.widgets.*;
@@ -51,7 +50,7 @@ import java.awt.*;
 import java.util.Set;
 
 @OnlyIn(Dist.CLIENT)
-public class ExperienceDescriptionScreen extends Screen implements IAutoScaledScreen, IRelicScreenProvider, ITabbedDescriptionScreen {
+public class ExperienceDescriptionScreen extends Screen implements IAutoScaledScreen, IRelicScreenProvider, IPagedDescriptionScreen {
     public final Screen screen;
 
     @Getter
@@ -86,6 +85,8 @@ public class ExperienceDescriptionScreen extends Screen implements IAutoScaledSc
     protected void init() {
         if (stack == null || !(stack.getItem() instanceof IRelicItem relic))
             return;
+
+        updateCache(relic);
 
         int x = (this.width - backgroundWidth) / 2;
         int y = (this.height - backgroundHeight) / 2;

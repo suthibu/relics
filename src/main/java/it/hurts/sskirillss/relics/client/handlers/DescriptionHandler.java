@@ -1,11 +1,10 @@
 package it.hurts.sskirillss.relics.client.handlers;
 
 import com.mojang.blaze3d.platform.Window;
-import it.hurts.sskirillss.relics.client.screen.base.IRelicScreenProvider;
+import it.hurts.sskirillss.relics.api.events.common.TooltipDisplayEvent;
 import it.hurts.sskirillss.relics.client.screen.description.ability.AbilityDescriptionScreen;
 import it.hurts.sskirillss.relics.client.screen.description.experience.ExperienceDescriptionScreen;
 import it.hurts.sskirillss.relics.client.screen.description.misc.DescriptionCache;
-import it.hurts.sskirillss.relics.client.screen.description.misc.DescriptionUtils;
 import it.hurts.sskirillss.relics.client.screen.description.relic.RelicDescriptionScreen;
 import it.hurts.sskirillss.relics.items.relics.base.IRelicItem;
 import net.minecraft.ChatFormatting;
@@ -31,6 +30,8 @@ public class DescriptionHandler {
     private static final int REQUIRED_TIME = 10;
 
     private static int ticksCount;
+
+    private static int width;
 
     @SubscribeEvent
     public static void onPlayerTick(PlayerTickEvent.Post event) {
@@ -109,7 +110,9 @@ public class DescriptionHandler {
         if (!(event.getItemStack().getItem() instanceof IRelicItem))
             return;
 
-        event.getToolTip().add(drawProgressBar("||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||||"));
+        var filler = "|";
+
+        event.getToolTip().add(drawProgressBar(filler.repeat(width / Minecraft.getInstance().font.width(filler))));
     }
 
     public static MutableComponent drawProgressBar(String style) {
@@ -138,5 +141,13 @@ public class DescriptionHandler {
         component.append(Component.literal(string.substring(offset)).setStyle(Style.EMPTY.withColor(ChatFormatting.DARK_GRAY)));
 
         return component;
+    }
+
+    @SubscribeEvent
+    public static void onTooltipDisplay(TooltipDisplayEvent event) {
+        if (!(event.getStack().getItem() instanceof IRelicItem))
+            return;
+
+        width = event.getWidth();
     }
 }
